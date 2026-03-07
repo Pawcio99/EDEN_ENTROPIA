@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entropia i Ofiara — Paweł Majsterek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #1a1612;
+    --ink-soft:   #3d352c;
+    --ink-muted:  #7a6e62;
+    --gold:       #9a7b3a;
+    --gold-light: #c9a84c;
+    --gold-pale:  #f9f3e3;
+    --cream:      #faf7f0;
+    --cream-dark: #f2ede0;
+    --wine:       #5c1e2a;
+    --wine-pale:  #fdf0f2;
+    --blue:       #1e3a5c;
+    --blue-pale:  #eaf2fb;
+    --rule:       rgba(154,123,58,0.35);
+    --page-max:   720px;
+    --serif:      'EB Garamond', 'Georgia', serif;
+    --display:    'Cinzel', serif;
+    --elegant:    'Cormorant Garamond', serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { font-size: 18px; scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--serif);
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE TEXTURE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.5;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  #progress {
+    position: fixed; top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    width: 0%;
+    z-index: 999;
+    transition: width 0.1s linear;
+  }
+
+  /* ─── COVER ─── */
+  .cover {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--ink);
+    position: relative;
+    overflow: hidden;
+    padding: 4rem 2rem;
+  }
+
+  .cover-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, #2d1f0a 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 20% 80%, #1e0a0a 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 80% 20%, #0a1a2a 0%, transparent 60%);
+    opacity: 0.9;
+  }
+
+  .cover-ornament {
+    position: absolute;
+    width: 100%; height: 100%;
+    top: 0; left: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 79px,
+        rgba(154,123,58,0.8) 79px,
+        rgba(154,123,58,0.8) 80px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 79px,
+        rgba(154,123,58,0.8) 79px,
+        rgba(154,123,58,0.8) 80px
+      );
+  }
+
+  .cover-content {
+    position: relative; z-index: 2;
+    text-align: center;
+    max-width: 680px;
+  }
+
+  .cover-eyebrow {
+    font-family: var(--display);
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+
+  .cover-title {
+    font-family: var(--display);
+    font-size: clamp(2.4rem, 7vw, 4.5rem);
+    font-weight: 700;
+    color: var(--cream);
+    letter-spacing: 0.08em;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.5s forwards;
+  }
+
+  .cover-title span {
+    display: block;
+    color: var(--gold-light);
+    font-size: 0.55em;
+    letter-spacing: 0.15em;
+    font-weight: 400;
+    margin-top: 1rem;
+    font-family: var(--elegant);
+    font-style: italic;
+  }
+
+  .cover-rule {
+    width: 80px; height: 1px;
+    background: var(--gold);
+    margin: 2rem auto;
+    opacity: 0;
+    animation: fadeUp 1s 0.7s forwards;
+  }
+
+  .cover-quote {
+    font-family: var(--elegant);
+    font-style: italic;
+    font-size: 1.05rem;
+    color: rgba(250,247,240,0.7);
+    max-width: 500px;
+    margin: 0 auto 3rem;
+    line-height: 1.7;
+    opacity: 0;
+    animation: fadeUp 1s 0.9s forwards;
+  }
+
+  .cover-meta {
+    font-family: var(--display);
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 1s 1.1s forwards;
+  }
+
+  .cover-scroll {
+    position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 1.5s forwards;
+    cursor: pointer;
+    color: rgba(250,247,240,0.4);
+    font-size: 0.6rem;
+    font-family: var(--display);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+  }
+
+  .cover-scroll-line {
+    width: 1px; height: 40px;
+    background: linear-gradient(to bottom, transparent, var(--gold));
+    animation: scrollPulse 2s 2s infinite;
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(1.2); }
+  }
+
+  /* ─── MAIN CONTENT ─── */
+  .main {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: 5rem 2rem 8rem;
+  }
+
+  /* ─── TOC ─── */
+  .toc {
+    margin: 0 0 5rem;
+    padding: 2.5rem;
+    border: 1px solid var(--rule);
+    background: var(--cream-dark);
+    position: relative;
+  }
+
+  .toc::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+  }
+
+  .toc-title {
+    font-family: var(--display);
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+  }
+
+  .toc ol {
+    list-style: none;
+    counter-reset: toc;
+  }
+
+  .toc li {
+    counter-increment: toc;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(154,123,58,0.12);
+    display: flex; align-items: baseline; gap: 0.75rem;
+  }
+
+  .toc li:last-child { border-bottom: none; }
+
+  .toc li::before {
+    content: counter(toc, upper-roman);
+    font-family: var(--display);
+    font-size: 0.6rem;
+    color: var(--gold);
+    min-width: 1.8rem;
+    letter-spacing: 0.05em;
+  }
+
+  .toc a {
+    text-decoration: none;
+    color: var(--ink-soft);
+    font-family: var(--elegant);
+    font-size: 0.95rem;
+    transition: color 0.2s;
+    flex: 1;
+  }
+
+  .toc a:hover { color: var(--gold); }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    margin-bottom: 5rem;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── HEADINGS ─── */
+  .chapter-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .chapter-num {
+    font-family: var(--display);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    padding-top: 0.5rem;
+    min-width: 2.5rem;
+    text-align: right;
+  }
+
+  .chapter-title {
+    font-family: var(--elegant);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1.25;
+    letter-spacing: 0.01em;
+  }
+
+  h3 {
+    font-family: var(--elegant);
+    font-style: italic;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--blue);
+    margin: 2.5rem 0 1rem;
+    letter-spacing: 0.02em;
+  }
+
+  h3::before {
+    content: '§ ';
+    color: var(--gold);
+    font-style: normal;
+  }
+
+  /* ─── PARAGRAPHS ─── */
+  p {
+    margin-bottom: 1.3rem;
+    font-size: 1rem;
+    text-align: justify;
+    hyphens: auto;
+    color: var(--ink-soft);
+  }
+
+  p + p { text-indent: 1.5em; }
+  h3 + p, .blockquote + p, .callout + p, .verse + p { text-indent: 0; }
+
+  /* ─── BLOCKQUOTE ─── */
+  .blockquote {
+    margin: 2.5rem 0;
+    padding: 1.5rem 1.75rem;
+    background: var(--blue-pale);
+    border-left: 3px solid var(--blue);
+    position: relative;
+  }
+
+  .blockquote.gold {
+    background: var(--gold-pale);
+    border-left-color: var(--gold);
+  }
+
+  .blockquote.wine {
+    background: var(--wine-pale);
+    border-left-color: var(--wine);
+  }
+
+  .blockquote p {
+    font-family: var(--elegant);
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--ink);
+    margin: 0 0 0.6rem;
+    text-align: left;
+    text-indent: 0;
+    hyphens: none;
+  }
+
+  .blockquote p:last-child { margin: 0; }
+
+  .blockquote .attribution {
+    display: block;
+    margin-top: 0.75rem;
+    font-style: normal;
+    font-size: 0.78rem;
+    font-family: var(--display);
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+    text-align: right;
+  }
+
+  /* ─── VERSE (Hebrew) ─── */
+  .verse {
+    margin: 2.5rem 0;
+    padding: 1.5rem 1.75rem;
+    background: var(--gold-pale);
+    border: 1px solid rgba(154,123,58,0.3);
+    border-left: 3px solid var(--gold);
+    text-align: center;
+  }
+
+  .verse .hebrew {
+    font-size: 1.4rem;
+    direction: rtl;
+    unicode-bidi: bidi-override;
+    color: var(--gold);
+    font-family: var(--serif);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+    letter-spacing: 0.05em;
+  }
+
+  .verse .translation {
+    font-family: var(--elegant);
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--ink-soft);
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .verse .source {
+    font-family: var(--display);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    display: block;
+  }
+
+  /* ─── CALLOUT / DEFINITION ─── */
+  .callout {
+    margin: 2.5rem 0;
+    padding: 1.25rem 1.75rem;
+    background: var(--cream-dark);
+    border: 1px solid var(--rule);
+    position: relative;
+  }
+
+  .callout-label {
+    font-family: var(--display);
+    font-size: 0.58rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .callout p {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    margin: 0;
+    text-indent: 0;
+  }
+
+  /* ─── TWO COLUMN TABLE ─── */
+  .two-col {
+    margin: 2.5rem 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    font-size: 0.85rem;
+  }
+
+  .two-col-cell {
+    padding: 1.25rem 1.5rem;
+    background: var(--cream);
+  }
+
+  .two-col-cell:first-child { background: var(--blue-pale); }
+  .two-col-cell:last-child  { background: var(--gold-pale); }
+
+  .two-col-cell strong {
+    display: block;
+    font-family: var(--display);
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .two-col-cell ul { list-style: none; }
+  .two-col-cell li {
+    padding: 0.2rem 0;
+    color: var(--ink-soft);
+    font-family: var(--elegant);
+    font-size: 0.95rem;
+  }
+
+  .two-col-cell li::before {
+    content: '— ';
+    color: var(--gold);
+  }
+
+  /* ─── HORIZONTAL RULE ─── */
+  .rule {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    margin: 4rem 0;
+  }
+
+  .rule-ornament {
+    text-align: center;
+    margin: 3.5rem 0;
+    font-size: 1.2rem;
+    color: var(--gold);
+    letter-spacing: 0.5em;
+    opacity: 0.6;
+  }
+
+  /* ─── PROLOG / EPILOG LABELS ─── */
+  .section-label {
+    font-family: var(--display);
+    font-size: 0.6rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+
+  /* ─── CLOSING QUOTE ─── */
+  .closing {
+    text-align: center;
+    margin: 4rem 0 2rem;
+  }
+
+  .closing p {
+    font-family: var(--elegant);
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--wine);
+    text-align: center;
+    text-indent: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .closing p:last-child { color: var(--ink); }
+
+  /* ─── LICENSE FOOTER ─── */
+  .footer {
+    margin-top: 6rem;
+    padding: 2.5rem;
+    border-top: 1px solid var(--rule);
+    background: var(--cream-dark);
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .cc-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .cc-icons {
+    display: flex; gap: 4px;
+  }
+
+  .cc-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--cream);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: var(--display);
+    letter-spacing: 0;
+  }
+
+  .footer h4 {
+    font-family: var(--display);
+    font-size: 0.62rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .footer p { text-align: left; text-indent: 0; margin-bottom: 0.4rem; }
+
+  .footer a { color: var(--gold); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  /* ─── STICKY NAV ─── */
+  .side-nav {
+    position: fixed;
+    right: 2rem; top: 50%;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 0.5rem;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .side-nav.visible { opacity: 1; }
+
+  .side-nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--rule);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    position: relative;
+  }
+
+  .side-nav-dot:hover, .side-nav-dot.active {
+    background: var(--gold);
+    transform: scale(1.6);
+  }
+
+  .side-nav-dot .tooltip {
+    position: absolute;
+    right: calc(100% + 12px);
+    top: 50%; transform: translateY(-50%);
+    background: var(--ink);
+    color: var(--cream);
+    font-family: var(--display);
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.6rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .side-nav-dot:hover .tooltip { opacity: 1; }
+
+  /* ─── BACK TO TOP ─── */
+  .back-top {
+    position: fixed;
+    bottom: 2rem; right: 2rem;
+    width: 40px; height: 40px;
+    background: var(--ink);
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 100;
+  }
+
+  .back-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .back-top:hover { background: var(--gold); color: var(--ink); }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── SELECTION ─── */
+  ::selection {
+    background: rgba(154,123,58,0.2);
+    color: var(--ink);
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .side-nav { display: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .two-col-cell:first-child, .two-col-cell:last-child { background: var(--cream-dark); }
+  }
+
+  @media (max-width: 600px) {
+    html { font-size: 16px; }
+    .cover-title { letter-spacing: 0.04em; }
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ─── PRINT ─── */
+  @media print {
+    .cover { page-break-after: always; min-height: auto; padding: 4rem 2rem; }
+    .side-nav, .back-top, #progress { display: none; }
+    .section { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<!-- SIDE NAV -->
+<nav class="side-nav" id="sideNav">
+  <div class="side-nav-dot" data-target="prolog"><span class="tooltip">Prolog</span></div>
+  <div class="side-nav-dot" data-target="s1"><span class="tooltip">I. Demon i Zasada</span></div>
+  <div class="side-nav-dot" data-target="s2"><span class="tooltip">II. Adam jako Cherub</span></div>
+  <div class="side-nav-dot" data-target="s3"><span class="tooltip">III. Upadek</span></div>
+  <div class="side-nav-dot" data-target="s4"><span class="tooltip">IV. Szatan jako Igła</span></div>
+  <div class="side-nav-dot" data-target="s5"><span class="tooltip">V. Dwa Rodzaje Ofiary</span></div>
+  <div class="side-nav-dot" data-target="s6"><span class="tooltip">VI. Totalitaryzm</span></div>
+  <div class="side-nav-dot" data-target="s7"><span class="tooltip">VII. Powrót Cheruba</span></div>
+  <div class="side-nav-dot" data-target="s8"><span class="tooltip">VIII. Wcielenie</span></div>
+  <div class="side-nav-dot" data-target="epilog"><span class="tooltip">Epilog</span></div>
+</nav>
+
+<!-- BACK TO TOP -->
+<div class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+
+<!-- ═══════════════ COVER ═══════════════ -->
+<div class="cover" id="cover">
+  <div class="cover-bg"></div>
+  <div class="cover-ornament"></div>
+  <div class="cover-content">
+    <p class="cover-eyebrow">Esej filozoficzny · Marzec 2026</p>
+    <h1 class="cover-title">
+      Entropia i Ofiara
+      <span>Demon Maxwella, Szata Cheruba i Koszt Porządku</span>
+    </h1>
+    <div class="cover-rule"></div>
+    <p class="cover-quote">„Życie to ofiara na ołtarzu entropii — i nikt tego nie uniknie.<br>
+    Lecz od kierunku tej ofiary zależy, w jaki świat wejdziesz."</p>
+    <p class="cover-meta">Paweł Majsterek</p>
+  </div>
+  <div class="cover-scroll" onclick="document.getElementById('main-content').scrollIntoView({behavior:'smooth'})">
+    Czytaj
+    <div class="cover-scroll-line"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<main class="main" id="main-content">
+
+  <!-- TOC -->
+  <nav class="toc">
+    <p class="toc-title">Spis treści</p>
+    <ol>
+      <li><a href="#prolog">Prolog</a></li>
+      <li><a href="#s1">Demon i Zasada — Fizyczne Fundamenty</a></li>
+      <li><a href="#s2">Adam jako Cherub — Pierwotny Selekcjoner</a></li>
+      <li><a href="#s3">Upadek — Zmiana Stanu i Nowa Termodynamika</a></li>
+      <li><a href="#s4">Szatan jako Igła Tkająca — Próba jako Mechanizm</a></li>
+      <li><a href="#s5">Dwa Rodzaje Ofiary — Dwa Światy</a></li>
+      <li><a href="#s6">Totalitaryzm jako Termodynamiczna Katastrofa</a></li>
+      <li><a href="#s7">Powrót Cheruba — Odzyskanie Szaty</a></li>
+      <li><a href="#s8">Wcielenie jako Odpowiedź Symetryczna — Bóg dotknął Człowieka</a></li>
+      <li><a href="#epilog">Epilog</a></li>
+    </ol>
+  </nav>
+
+  <!-- ── PROLOG ── -->
+  <section class="section" id="prolog">
+    <span class="section-label">Prolog</span>
+    <hr class="rule">
+
+    <p>Był rok 1867. James Clerk Maxwell — jeden z największych fizyków swoich czasów — zaproponował eksperyment myślowy, który miał wstrząsnąć fundamentami termodynamiki. Wyobraźmy sobie mikroskopijnego strażnika siedzącego w szczelinie między dwoma komorami gazu. Demon obserwuje nadlatujące cząsteczki i otwiera drzwiczki selektywnie: szybkie — w prawo, wolne — w lewo. Jedna komora robi się cieplejsza, druga chłodniejsza. Bez widocznego kosztu. Silnik cieplny zasilany tą różnicą temperatur mógłby pracować wiecznie.</p>
+
+    <p>To nie była tylko fizykalna prowokacja. W metaforze Maxwella tkwi coś znacznie głębszego — archetyp strażnika na granicy dwóch stanów, selekcjonera porządku stojącego między chaosem a strukturą. I ten archetyp ma tysiące lat.</p>
+
+    <div class="blockquote gold">
+      <p>Wtedy to Pan Bóg wygnał go z ogrodu Eden. […] Postawił przed ogrodem Eden cherubów i połyskujące ostrze miecza, aby strzegli drogi do drzewa życia.</p>
+      <span class="attribution">— Rodzaju 3:23–24</span>
+    </div>
+
+    <p>Mamy tu ten sam obraz: selekcjonera na granicy, strażnika przepuszczającego lub blokującego dostęp do stanu wyższego porządku. Fizyk XIX wieku i tekst sprzed trzech tysięcy lat mówią — jak się okaże — dokładnie o tym samym mechanizmie rzeczywistości.</p>
+
+    <p>Niniejszy esej jest próbą odsłonięcia tej wspólnej głębi. Porządek nie jest dany — jest wytwarzany. Każde jego wytworzenie ma koszt. A od tego, kto płaci ten koszt i jak — zależy, w jaki świat wchodzi ten, kto go płaci.</p>
+  </section>
+
+  <div class="rule-ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+  <!-- ── I ── -->
+  <section class="section" id="s1">
+    <div class="chapter-head">
+      <span class="chapter-num">I</span>
+      <h2 class="chapter-title">Demon i Zasada<br><em>Fizyczne Fundamenty</em></h2>
+    </div>
+
+    <h3>Paradoks Maxwella</h3>
+    <p>Demon Maxwella przez sto lat był kamyczkiem w bucie termodynamiki. Wydawało się, że jeśli taki strażnik mógłby działać, Druga Zasada Termodynamiki byłaby złamana: entropia układu zamkniętego mogłaby maleć. Porządek mógłby powstawać z chaosu za darmo.</p>
+
+    <p>Rozwiązanie nadeszło w połowie XX wieku i okazało się rewolucyjne: demon nie jest bytem metafizycznym. Jest maszyną informacyjną. Żeby selekcjonować cząsteczki, musi je mierzyć, zapamiętywać wyniki i — co kluczowe — kasować dane, żeby mieć miejsce na pomiar kolejnej cząsteczki.</p>
+
+    <div class="callout">
+      <span class="callout-label">Zasada Landauera (1961)</span>
+      <p>Skasowanie jednego bitu informacji generuje co najmniej <em>kT·ln(2)</em> ciepła. Przy miliardach cząsteczek — rachunek termodynamiczny zawsze wychodzi na zero lub na minusie dla perpetuum mobile. Informacja i energia są dwoma aspektami tej samej rzeczywistości.</p>
+    </div>
+
+    <p>Entropia nie znika. Przenosi się w informację — a informacja, gdy musi być kasowana, oddaje entropię z powrotem do układu. Perpetuum mobile znowu się rozpada. Ale coś niezwykłego zostaje: odkrycie, że informacja i energia są fizykalnie nierozłączne. Porządek kosztuje — i płaci się go substancją fizyczną.</p>
+
+    <h3>Entropia jako reguła statystyczna — nie kara</h3>
+    <p>Błędem jest myśleć o drugiej zasadzie termodynamiki jak o sile kosmicznej ciągnącej ku chaosowi. Ludwig Boltzmann pokazał: entropia rośnie dlatego, że stanów nieuporządkowanych jest astronomicznie więcej niż uporządkowanych. Układ ewoluujący losowo prawie zawsze trafi w stan nieuporządkowany — nie dlatego, że jakaś siła go popycha, lecz dlatego, że bezporządek jest statystycznie przytłaczający.</p>
+
+    <p>Każda struktura — atom, komórka, organizm, miasto, cywilizacja — jest lokalnym zaburzeniem tej statystyki. Istnieje pod prąd. By przetrwać, potrzebuje demona: mechanizmu selekcji utrzymującego granicę między porządkiem a rozpadem, zasilanego stałym przepływem energii i informacji.</p>
+
+    <div class="blockquote">
+      <p>Kosmos nie zakazuje porządku. On tylko wystawia rachunek za jego utrzymanie.</p>
+      <p>I pytanie o to, kto płaci ten rachunek — i czym — jest być może najtrudniejszym pytaniem, jakie możemy postawić.</p>
+    </div>
+  </section>
+
+  <div class="rule-ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+  <!-- ── II ── -->
+  <section class="section" id="s2">
+    <div class="chapter-head">
+      <span class="chapter-num">II</span>
+      <h2 class="chapter-title">Adam jako Cherub<br><em>Pierwotny Selekcjoner</em></h2>
+    </div>
+
+    <h3>Człowiek przed upadkiem: żywy mechanizm selekcji</h3>
+    <p>Pisma Hebrajskie opisują Adama w kategoriach, które nabierają zupełnie nowego wymiaru w świetle termodynamiki. Adam w Gan Eden jest istotą odzianą w <em>or</em> — światło. Kabała (Zohar I:35b) opisuje tę „szatę najwyższego światła" (<em>lewusz ha-or ha-elyon</em>) jako funkcjonalną ochronę i zarazem medium przekazu: Adam mógł stykać się z nieskończonym światłem Ein Sof bez spalenia, bo szata ta działała jako doskonały transformator energii.</p>
+
+    <p>Cherubiny (<em>keruwim</em>), ustawione później przy bramie Edenu jako strażnicy, nie są dla Adama obce — są, jak uczy Zohar (III:113a), zewnętrzną formą tej samej zdolności, którą Adam posiadał wewnętrznie. Cherub to wieloaspektowy selekcjoner: istota o czterech twarzach patrząca jednocześnie w cztery kierunki, zdolna do działania na wielu poziomach rzeczywistości naraz.</p>
+
+    <div class="two-col">
+      <div class="two-col-cell">
+        <strong>Fizyka</strong>
+        <ul>
+          <li>Demon Maxwella</li>
+          <li>Selekcja cząsteczek</li>
+          <li>Koszt: entropia informacji</li>
+          <li>Utrzymuje gradient energii</li>
+        </ul>
+      </div>
+      <div class="two-col-cell">
+        <strong>Kabała</strong>
+        <ul>
+          <li>Adam / Cherub</li>
+          <li>Selekcja iskier światła</li>
+          <li>Koszt: micwot, ofiarowanie siebie</li>
+          <li>Utrzymuje gradient duchowy</li>
+        </ul>
+      </div>
+    </div>
+
+    <p>W termodynamicznym języku kabały: Adam był układem zdolnym do lokalnego obniżania entropii bez naruszania bilansu całości — bo koszt był wbudowany w samą strukturę jego istnienia, w relację z Dawcą energii, nie w eksploatację zewnętrznych zasobów.</p>
+
+    <h3>Szata światła jako stan termostatyczny</h3>
+    <p><em>Kutonet or</em> — szata światła — jest w mistycznym odczytaniu czymś więcej niż metaforą. To opis stanu fizyczno-duchowego: forma organizacji energii, która czyni możliwym kontakt z wyższymi stanami porządku bez destrukcji niższych. Psalm 104:2 opisuje Boga odzianego w światło jak szatą — Adam w szacie <em>or</em> był obrazem (<em>tzelem</em>) tego stanu.</p>
+
+    <p>Szata ta nie była pasywna. Wymagała aktywnego utrzymania — relacji, uwagi, wierności. Była jak otwarty układ termodynamiczny podtrzymywany stałym przepływem energii od zewnątrz. Gdy przepływ został przerwany — układ zaczął dryfować ku równowadze.</p>
+
+    <div class="verse">
+      <span class="hebrew">בָּרוּךְ הַגֶּבֶר אֲשֶׁר יִבְטַח בַּיהֹוָה</span>
+      <span class="translation">Błogosławiony mąż, który ufa Panu, którego ufność jest w Panu.</span>
+      <span class="source">— Jeremiasz 17,7</span>
+    </div>
+
+    <p>Zaufanie — <em>bitachon</em> — jest tu kategorią termodynamiczną: otwartość układu na stały dopływ energii z zewnątrz, bez próby zamknięcia się w izolowanym perpetuum mobile. Człowiek ufający jest układem otwartym. Człowiek, który ufa wyłącznie sobie, staje się układem zamkniętym — i entropia rośnie.</p>
+  </section>
+
+  <div class="rule-ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+  <!-- ── III ── -->
+  <section class="section" id="s3">
+    <div class="chapter-head">
+      <span class="chapter-num">III</span>
+      <h2 class="chapter-title">Upadek<br><em>Zmiana Stanu i Nowa Termodynamika</em></h2>
+    </div>
+
+    <h3>Or do Or: od światła do skóry</h3>
+    <p>W scenie upadku Tory kryje się precyzyjna fizyczna informacja zapisana w grze językowej. Przed upadkiem Adam i Ewa są odziani w <span style="font-weight:600">אוֹר</span> — <em>or</em>, światło. Po upadku Bóg ubiera ich w <span style="font-weight:600">עוֹר</span> — <em>or</em>, skóra. Ta sama wymowa, inne litery. Alef zamienione w ajin.</p>
+
+    <p>To opis zmiany fazy. Układ wyemitował swój zapas negentropii — wewnętrznej energii organizacyjnej — i przeszedł w stan gęstszy, bardziej nieprzejrzysty, bardziej zamknięty. Zohar (III:148a) interpretuje tę zamianę jako akt jednoczesnego miłosierdzia i sądu: miłosierdzia, bo bez skóry kruche ludzkie naczynie rozpadłoby się w bezpośrednim kontakcie z nieskończonym światłem; sądu, bo nowa szata jest także więzieniem — ogranicza percepcję, zagęszcza zmysły, wprowadza śmiertelność.</p>
+
+    <div class="blockquote gold">
+      <p>Wygnanie z Edenu nie jest karą arbitralną. Jest opisem zmiany stanu układu: z otwartego, zasilanego zewnętrznie, ku zamkniętemu — samowystarczalnemu w złudzeniu, lecz skazanemu na rozpad w rzeczywistości.</p>
+      <p>Eden był przestrzenią zatrzymania — enkawą niskiej entropii, w której czas nie toczył się zwykłym rytmem. Szabat jest obrazem tej prawdy: jeden dzień zatrzymania, jeden dzień nieprodukcji — to nie lenistwo, to rekonneksja z zasilaniem zewnętrznym.</p>
+    </div>
+
+    <h3>Płonący miecz — cherubiczna zdolność zwrócona przeciw nam</h3>
+    <p>Po wygnaniu Bóg stawia cherubów z <em>lahat ha-cherev hamit'hapeket</em> — płonącym mieczem obracającym się na wszystkie strony — by strzegli drogi do Drzewa Życia. W mistycznym odczytaniu Zoharu ten miecz nie jest nowym stworzeniem. To ta sama cherubiczna zdolność, którą Adam posiadał wewnętrznie, teraz externalizowana i skierowana przeciwko niemu.</p>
+
+    <p>To precyzyjny opis termodynamiczny: energia, która wcześniej organizowała układ od wewnątrz, teraz stoi na jego zewnątrz jako bariera. Droga powrotu do niskiej entropii wiedzie przez ten sam ogień, który teraz ją strzeże. By odzyskać szatę światła — trzeba przejść przez próbę ognia.</p>
+  </section>
+
+  <div class="rule-ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+  <!-- ── IV ── -->
+  <section class="section" id="s4">
+    <div class="chapter-head">
+      <span class="chapter-num">IV</span>
+      <h2 class="chapter-title">Szatan jako Igła Tkająca<br><em>Próba jako Mechanizm</em></h2>
+    </div>
+
+    <h3>Przeciwnik ontologiczny</h3>
+    <p>Kabała widzi szatana (<em>szatan</em> — przeciwnik, oskarżyciel) nie jako złoczyńcę moralnego, lecz jako siłę strukturalną. Zohar mówi wprost: każdy dar z nieba przychodzi z próbą — <em>kol matana min szamaia ati im nisajon</em>. Szatan pojawia się nie dlatego, że jest złośliwy, lecz dlatego, że jest konieczny. Bez oporu nie ma pracy. Bez pracy nie ma wytworzenia energii organizacyjnej. Bez tej energii nie ma szaty.</p>
+
+    <p>Abraham otrzymuje Izaaka — owoc najgłębszego pragnienia — i natychmiast musi być gotów go oddać. Mojżesz otrzymuje powołanie proroka i musi przeprowadzić przez pustynię zdolność działania w innym porządku — reprezentowaną przez Jetrego, kapłana Midianitów, figurę siły pozornie obcej. Każde wzniesienie duszy ku wyższemu stanowi porządku wypiera domenę niższego — i to niższe reaguje, bo musi.</p>
+
+    <div class="blockquote wine">
+      <p>Szatan działa jak igła tkająca szatę — sprawia, że wartość zostaje wystawiona na próbę. Jeśli dusza wytrwa, nie popadając w rozpacz ani urazę, szata zostaje zapieczętowana — odporna na dalsze ataki w tej dziedzinie.</p>
+      <p>W mistycznym sensie Szatan nie jest wyłącznie przeciwnikiem — jest strażnikiem progu.</p>
+    </div>
+
+    <h3>Fizyczny odpowiednik: test stabilności struktury</h3>
+    <p>W fizyce każda nowa struktura, by stać się stabilna, musi przejść przez test perturbacji. Atom, by związać się w cząsteczkę, musi pokonać barierę aktywacji. Kryształ, by się uformować, musi przejść przez fluktuacje termiczne. Nowa faza materii wyłania się z chaosu poprzedniego stanu — i przez chwilę oba stany koegzystują w napięciu.</p>
+
+    <p>Próba — <em>nisajon</em> — jest właśnie tym procesem na poziomie duchowym: nowy stan organizacji, by stać się trwały, musi wykazać, że jego wewnętrzna entropia jest niższa niż poprzedniego. Szatan dostarcza perturbacji testowej. Jeśli nowa struktura się utrzyma — jest stabilna. Jeśli się rozpadnie — rachunek entropii był fałszywy od początku.</p>
+
+    <p>Pieśni bałkańskie wołające o owieczkę na posiłek — <em>Ederlezi</em> — pieśni paschalne, rytuał ofiary: to nie są barbarzyńskie relikty. To precyzyjny opis mechanizmu: by podtrzymać lokalny porządek, coś musi zostać ofiarowane. Pytanie brzmi — co i przez kogo.</p>
+  </section>
+
+  <div class="rule-ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+  <!-- ── V ── -->
+  <section class="section" id="s5">
+    <div class="chapter-head">
+      <span class="chapter-num">V</span>
+      <h2 class="chapter-title">Dwa Rodzaje Ofiary<br><em>Dwa Światy</em></h2>
+    </div>
+
+    <h3>Ofiara siebie: układ dążący ku zerowej entropii</h3>
+    <p>Nie każda ofiara prowadzi do tego samego miejsca. W układach termodynamicznych istnieje fundamentalna asymetria: układ może obniżać swoją entropię, przenosząc ją na zewnątrz — ale kierunek tego przeniesienia zmienia wszystko.</p>
+
+    <p>Ofiara siebie — poświęcenie własnego komfortu, własnych pragnień, własnej energii — to ofiara wewnętrzna. Układ ponosi koszt organizacji kosztem własnych zasobów, stopniowo budując struktury o coraz niższej entropii wewnętrznej. Każdy akt prawdziwej Chesed — miłości nieodwzajemnionej, działania bez gwarancji nagrody — jest emisją iskry (<em>nitsotzot</em>) ku wyższemu stanowi organizacji. Kumulowane, te iskry tkają szatę cheruba: zdolność do coraz precyzyjniejszej selekcji, coraz wyższej organizacji wewnętrznej.</p>
+
+    <div class="blockquote">
+      <p>Człowiek w sobie wytwarza porządek, którego staje się panem, ponosząc koszt energetyczny utrzymania układu.</p>
+      <p>Ten, kto w enklawie testowej dźwiga konsekwencje porządkowania układu, jest zarazem jej panem i najwyższym sądem rzeczywistości.</p>
+    </div>
+
+    <p>Droga jest trudna — i słowo „trudna" jest tu kategorią termodynamiczną, nie moralną. Układy o niskiej entropii są rzadkie statystycznie. Ich wytworzenie wymaga pracy precyzyjnej i długotrwałej. Ale raz wytworzony porządek staje się platformą dla porządku wyższego.</p>
+
+    <h3>Ofiara innych: układ dążący ku nieskończonej entropii</h3>
+    <p>Przeciwne jest: budowanie porządku lokalnego kosztem przelewania entropii na innych. To możliwe — i krótkoterminowo skuteczne. Imperium, które eksploatuje peryferia, może przez pewien czas utrzymywać centrum w stanie niskiej entropii. Dyktator, który koncentruje zasoby, może budować powierzchowną strukturę. Totalitaryzm, który niszczy indywidualność, może tworzyć iluzję porządku.</p>
+
+    <p>Ale rachunek termodynamiczny jest nieubłagany: entropia wyeksportowana na zewnątrz nie znika. Kumuluje się w systemie, w środowisku, w zbiorowości. A gdy osiągnie masę krytyczną — wraca. Rewolucja jest zawsze powrotem wyeksportowanej entropii.</p>
+
+    <div class="two-col">
+      <div class="two-col-cell">
+        <strong>Ofiara siebie</strong>
+        <ul>
+          <li>Koszt: własne zasoby</li>
+          <li>Eksport entropii przez pracę</li>
+          <li>Wzrost wewnętrznej organizacji</li>
+          <li>Kierunek: ku zerowej entropii</li>
+          <li>Analogia: Cherub, Adam, Chesed</li>
+        </ul>
+      </div>
+      <div class="two-col-cell">
+        <strong>Ofiara innych</strong>
+        <ul>
+          <li>Koszt: cudze zasoby</li>
+          <li>Eksport entropii na innych</li>
+          <li>Pozorna lokalna organizacja</li>
+          <li>Kierunek: ku nieskończonej entropii</li>
+          <li>Analogia: Szatan, Fałszywa Prawa Ręka</li>
+        </ul>
+      </div>
+    </div>
+
+    <p>Nieskończona entropia to nie metafora. To opis układu, który eksploatując zewnętrzne zasoby bez granic, finalnie niszczy podstawy własnego istnienia. Ekologia zna ten proces doskonale: populacja, która eksploatuje środowisko bez ograniczeń, kolapsuje. Społeczeństwo, które eksploatuje własnych członków bez ograniczeń, kolapsuje. Nie ma tu wyjątków od fizyki.</p>
+  </section>
+
+  <div class="rule-ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+  <!-- ── VI ── -->
+  <section class="section" id="s6">
+    <div class="chapter-head">
+      <span class="chapter-num">VI</span>
+      <h2 class="chapter-title">Totalitaryzm jako Termodynamiczna Katastrofa<br><em>Cenzura, Propaganda, Prześladowanie</em></h2>
+    </div>
+
+    <p>Totalitaryzm jest dosłownie termodynamiczną katastrofą — nie w sensie metaforycznym, lecz strukturalnym. Każdy system polityczny, który buduje swój porządek kosztem zasobów wewnętrznych — wolności, prawdy, indywidualności swoich obywateli — eksportuje entropię do tkanki społecznej.</p>
+
+    <p>Cenzura jest blokadą kanałów informacyjnych — a informacja, jak nauczył nas Landauer, jest substancją fizyczną. Gdy informacja jest blokowana, kasowana, zafałszowywana — jej koszt termodynamiczny jest ponoszony przez układ, tylko nieproporcjonalnie: przez tych, którzy ją produkują i przez których jest kasowana. Dysydent niosący prawdę w systemie opartym na kłamstwie jest dosłownie demonem w złym układzie — i koszt, który ponosi, jest fizycznym kosztem utrzymania informacji wbrew presji entropii systemu.</p>
+
+    <p>Propaganda jest tworzeniem sztucznego porządku narracyjnego bez pokrycia w rzeczywistości. Taki porządek jest układem o pozornie niskiej, a faktycznie ogromnej entropii ukrytej: każde zdanie propagandowe wymaga energii do podtrzymania — cenzorów, kontrolerów, systemów inwigilacji — i generuje entropię w umysłach tych, którzy wiedzą prawdę, lecz muszą kłamać.</p>
+
+    <div class="blockquote wine">
+      <p>Prześladowanie opozycji jest klasycznym eksportem entropii: układ utrzymuje pozorną stabilność, przenosząc koszty na tych, którzy wskazują na rozbieżność między deklarowanym porządkiem a rzeczywistością.</p>
+      <p>To strategia węża — korumpowanie kanału stworzenia zamiast budowania własnego.</p>
+    </div>
+
+    <h3>Dlaczego piekło istnieje — i droga do niego jest łatwa</h3>
+    <p>Układ budowany kosztem innych nie wymaga trudu wewnętrznego — i to czyni tę drogę łatwą. Nie trzeba budować szaty, wytwarzać porządku wewnętrznego, przechodzić przez próbę ognia. Wystarczy sięgnąć po zasoby zewnętrzne.</p>
+
+    <p>Ale łatwość drogi jest złudzeniem rachunku krótkoterminowego. W długiej perspektywie układ oparty na eksploatacji buduje wokół siebie rosnący ocean entropii, który ostatecznie go pochłania. „Piekło" w tym sensie nie jest miejscem kary zewnętrznej: jest stanem, w którym system, który eksportował entropię do otoczenia, zostaje przez nią ostatecznie otoczony. Izolacja. Rozpad. Powrót do równowagi termicznej bez możliwości powrotu do stanu niskiej entropii, bo zasoby, które umożliwiały budowanie porządku, zostały już skonsumowane.</p>
+
+    <p>Ewangelia — a za nią Tora czytana oczami Chrystusa — jest opisem tej asymetrii. <em>Kto traci życie swoje, zachowa je. Kto szuka zachować swoje życie, straci je.</em> W języku termodynamiki: kto emituje własną entropię przez ofiarowanie siebie, buduje nieskończony zapis porządku. Kto broni swojej lokalnej niskiej entropii kosztem innych, ostatecznie kumuluje entropię wystarczającą do własnego rozpadu.</p>
+  </section>
+
+  <div class="rule-ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+  <!-- ── VII ── -->
+  <section class="section" id="s7">
+    <div class="chapter-head">
+      <span class="chapter-num">VII</span>
+      <h2 class="chapter-title">Powrót Cheruba<br><em>Odzyskanie Szaty</em></h2>
+    </div>
+
+    <h3>Droga przez ogień</h3>
+    <p>Płonący miecz obracający się na wszystkie strony jest bramą, nie ścianą. Zohar mówi: ogień Szechiny tka albo miażdży — zależy od naczynia. Ten sam ogień, który był szatą Adama, stoi teraz jako strażnik na granicy. By powrócić do stanu niskiej entropii — cherubicznej zdolności selekcji — trzeba wejść w ogień i nie uciec.</p>
+
+    <p>Jan od Krzyża w <em>Nocy ciemnej</em> opisuje ten sam proces: ogień Boży spala to, co mu się sprzeciwia, lecz jednocześnie okrywa to, co trwa. Hildegarda z Bingen widzi blask, który spala nieczystość i okrywa szatą jasności. Mistrz Eckhart mówi o iskrze duszy spotykanej z Bogiem-ogniem: w spaleniu dusza staje się wolna, by przyodziać się w nowe światło.</p>
+
+    <div class="blockquote">
+      <p>Obie tradycje — kabalistyczna i chrześcijańska — mówią jednym językiem symboli: ogień, szata, wąż, wiatr.</p>
+      <p>To nie są tylko metafory. To mistyczne opisy tej samej fizyczno-duchowej rzeczywistości: obecności, która nie jest neutralna.</p>
+    </div>
+
+    <h3>Szabat: enklawa zerowej entropii</h3>
+    <p>Szabat jest obrazem prawdy o strukturze rzeczywistości: jeden dzień na siedem jest dniem zatrzymania — odmowy produkcji, eksploatacji, rozszerzania. Dniem, w którym układ nie pracuje nad podtrzymaniem swojego porządku, lecz otwiera się na zasilanie z zewnątrz.</p>
+
+    <p>W języku termodynamiki: Szabat jest regularną rekonneksją otwartego układu ze źródłem energii. Bez niej układ staje się coraz bardziej samoodnoszący, coraz bardziej zamknięty, coraz bliższy termodynamicznej śmierci cieplnej — nie z powodu braku aktywności, lecz z powodu braku otwartości na energię, której sam nie wytworzy.</p>
+
+    <p>Eden był permanentnym Szabatem. Wygnanie — permanentną pracą. Historia zbawienia — rytmicznym powrotem Szabatu w czas historyczny, jako stałe przypomnienie, że układ nie jest samowystarczalny.</p>
+
+    <h3>Pole Potencjalności i Wybór Materializacji</h3>
+    <p>Na samym dnie rzeczywistości — w polu kwantowym, w próżni pełnej fluktuacji, w superpozycji niezmaterializowanych stanów — istnieje to, co można nazwać Polem Potencjalności. Cząstki nie są twardymi kulkami: są wzbudzeniami pól, lokalnymi drganiami rozciągającymi się przez całą przestrzeń. Materializacja zachodzi w akcie pomiaru, interakcji, wybrania jednej możliwości kosztem innych.</p>
+
+    <p>W języku Tory: sięgnęliśmy po Boga — po Potencjalność — i Ona zapytuje nas: kim jesteś? To jest brama przejścia. Wirujące ostrze ognia ofiary porządkowania Potencjalności w świat. Wybór tego, co się zmaterializuje, jest jednocześnie wyborem, jakim kosztem — i w jaki świat się wejdzie.</p>
+
+    <div class="verse">
+      <span class="hebrew">וַיְגָרֶשׁ אֶת-הָאָדָם</span>
+      <span class="translation">I wygnał człowieka — i postawił na wschodzie ogrodu Edenu cherubów i płomień miecza wirującego, aby strzegli drogi do drzewa życia.</span>
+      <span class="source">— Rodzaju 3,24</span>
+    </div>
+
+    <p>Jak gdyby śmiercią był sam wybór Potencjalności, po który sięgnęliśmy — i on nas wrzuca w świat rozpadu i śmiertelnych kosztów przyzwoitości. Każdy wybór konkretnego stanu z oceanu możliwości jest zamknięciem wszystkich innych — jest redukcją potencjalnej niskiej entropii do entropii aktualnej. I jest początkiem pracy, by z tej aktualności zbudować nową Potencjalność wyższego rzędu.</p>
+  </section>
+
+  <div class="rule-ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+  <!-- ── VIII ── -->
+  <section class="section" id="s8">
+    <div class="chapter-head">
+      <span class="chapter-num">VIII</span>
+      <h2 class="chapter-title">Wcielenie jako Odpowiedź Symetryczna<br><em>Bóg dotknął Człowieka</em></h2>
+    </div>
+
+    <h3>Dotknięcie odwrócone — logika symetrii</h3>
+    <p>W Edenie człowiek wyciągnął rękę ku Bogu. Chciał dotknąć Potencjalności — stać się jak Najwyższy, sięgnąć po wiedzę dobra i zła, po zdolność tworzenia porządku z własnego centrum, bez pośrednictwa relacji. Michał Anioł uchwycił to z precyzją w Kaplicy Sykstyńskiej: nie w scenie stworzenia, lecz właśnie w scenie rajskiej — napięcie wyciągniętej ręki, minimalny dystans, przestrzeń między palcami, która jest zarazem połączeniem i przerwą. Człowiek sięgnął. I w tym sięgnięciu zmienił swój stan termodynamiczny: układ zamknął się, szata światła opadła, entropia zaczęła rosnąć. Gestowi pozostało echo — i pytanie: czy może zostać odwzajemniony z drugiej strony?</p>
+
+    <div class="blockquote gold">
+      <p>Wcielenie jest odpowiedzią symetryczną na gest Edenu. Człowiek chciał dotknąć Boga — Bóg dotknął Człowieka. Nie jako kara za zuchwałość, lecz jako domknięcie otwartego obwodu. Kanał, który zerwał się od strony ludzkiej, został odtworzony od strony Boskiej.</p>
+    </div>
+
+    <h3>Wcielenie jako zdarzenie termodynamiczne</h3>
+    <p>W języku fizyki, którym posługuje się ten esej: Wcielenie jest wejściem nieskończonego źródła energii w układ zamknięty — nie po to, by go unicestwić, lecz by go ponownie otworzyć. By przywrócić przepływ, który Adam zablokował przez próbę stania się samowystarczalnym. Jest to jedyne zdarzenie w historii, w którym Pole Potencjalności nie czeka na ludzki akt pomiaru, lecz samo wchodzi w materię jako mierzalny stan: konkretność, która otwiera Potencjalność dla wszystkich, którzy wejdą w relację z tym wyborem.</p>
+
+    <h3>Kaplica Sykstyńska — odczyt termodynamiczny</h3>
+    <p>W scenie stworzenia Adama gest jest asymetryczny: ludzka ręka zwisa bez napięcia, boska się wyciąga. To nie człowiek sięga — to Bóg zbliża palec. W scenie wygnania z Raju jest odwrotnie: człowiek sięga ku owocowi, ku wiedzy, ku Bogu pojętemu jako władza — i w tym sięgnięciu zamyka układ. Cherub z mieczem staje się zewnętrznym strażnikiem kosztu, którego człowiek nie chciał płacić wewnętrznie.</p>
+
+    <p>Wcielenie jest powrotem do pierwotnej geometrii Stworzenia. Bóg, który w stworzeniu wyciągnął palec ku Adamowi — w Wcieleniu staje się Adamem. Nie tylko dotyka — wchodzi. Asymetria zostaje ostatecznie zniesiona: Ten, kto jest źródłem energii, staje się naczyniem, by naczynie mogło znów stać się przewodnikiem.</p>
+
+    <div class="blockquote wine">
+      <p>Bez Wcielenia układ o zerowej entropii byłby logicznie niemożliwy dla człowieka po Upadku. Człowiek zamknięty w szacie skóry nie ma dostępu do nieskończonego źródła energii organizacyjnej — może jedynie wymieniać entropię wewnątrz skończonego układu. Wcielenie jest wejściem nieskończoności w układ skończony, które czyni ponowne otwarcie fizycznie możliwym.</p>
+    </div>
+
+    <h3>Szabat odblokowany — kanał przejścia przez właściwą perspektywę</h3>
+    <p>Eden był permanentnym Szabatem — stanem, w którym czas nie toczył się rytmem entropii, lecz rytmem komunii. Wygnanie zamknęło ten kanał. Historia tęsknoty za Szabatem jest historią ludzkości szukającej powrotu do stanu zerowej entropii wewnętrznej — i niemogącej go osiągnąć własnymi siłami, bo każdy własny wysiłek zużywa energię z tego samego zamkniętego układu.</p>
+
+    <p>Wcielenie otwiera kanał przejścia przez wybór właściwej perspektywy: nie człowiek wchodzi w Boga siłą sięgającego palca, lecz Bóg wchodzi w człowieka, by człowiek mógł — przez relację, nie przez zdobycie — wejść z powrotem w Szabat. Kanał przepływu zostaje przywrócony nie od strony ludzkiego wysiłku, lecz od strony Boskiej inicjatywy.</p>
+
+    <p>Jest to precyzyjna konsekwencja logiczna całego wywodu: jeśli człowiek jest układem, który przez wybór samozamknięcia utracił dostęp do źródła energii organizacyjnej, a entropia w zamkniętym układzie może tylko rosnąć — jedynym wyjściem jest otwarcie układu od zewnątrz. Nie korekta moralna. Nie intensywniejszy wysiłek. Wejście źródła w układ. Inkarnacja jako akt termodynamiczny — przewidywalny, konieczny, elegancki w swojej logice jak każde prawo fizyki.</p>
+
+    <div class="blockquote">
+      <p>Człowiek chciał stać się jak Bóg — i zamknął się w sobie.</p>
+      <p>Bóg stał się człowiekiem — i otworzył w nim to, czego człowiek zamknąć nie potrafił.</p>
+      <p>Nie jako paradoks, lecz jako symetria. Nie jako cud wbrew fizyce, lecz jako domknięcie równania, które bez tej zmiennej nie miało rozwiązania.</p>
+    </div>
+  </section>
+
+  <div class="rule-ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+  <!-- ── EPILOG ── -->
+  <section class="section" id="epilog">
+    <span class="section-label">Epilog</span>
+    <hr class="rule">
+
+    <p>Demon Maxwella i cherub przy bramie Edenu są tym samym bytem widzianym z dwóch stron tej samej rzeczywistości: mechanizmem selekcji na granicy dwóch stanów, strażnikiem kosztu porządku.</p>
+
+    <p>Fizyka i tysiącletnia mądrość mówią zgodnie: porządek jest możliwy, lecz nie jest darmowy. Jego koszt można płacić sobą — i wtedy droga wiedzie ku coraz wyższym stanom organizacji, ku odzyskaniu szaty cheruba, ku Potencjalności realizowanej w pełni. Lub można próbować płacić innymi — i wtedy buduje się coraz gęstszy ocean entropii wokół siebie, który ostatecznie pochłonie wszystko.</p>
+
+    <p>Nie ma tu mowy o moralności jako zewnętrznym kodeksie. Jest tu mowa o fizyce rzeczywistości, w której żyjemy. Zasady nie są arbitralne — są wbudowane w strukturę rzeczywistości tak głęboko, że zapisano je zarówno w równaniach termodynamiki, jak i w Torze sprzed trzech tysięcy lat.</p>
+
+    <div class="blockquote gold">
+      <p>Rozumiesz teraz geniusz tej Księgi sprzed tysięcy lat?</p>
+      <p>Z samej analizy poznawczej trzeba przyjąć Ewangelię jako niesamowicie precyzyjną Prawdę o rzeczywistości jaka nas otacza — i najgłębsze poznawczo wyłożenie semantyki Tory.</p>
+      <p>Entropia nie jest klątwą. Jest sprężyną rzeczywistości poznawanej zmysłami — i zaproszeniem do wytworzenia w sobie czegoś, czego sama z siebie nigdy nie wytworzy.</p>
+    </div>
+
+    <hr class="rule">
+
+    <div class="closing">
+      <p>Tak życie to ofiara na ołtarzu entropii — i nikt tego nie uniknie.</p>
+      <p style="color: var(--ink); font-style: normal;">Lecz od rodzaju tej ofiary zależy, w jaki świat wejdziesz.</p>
+    </div>
+  </section>
+
+  <!-- ── FOOTER / LICENSE ── -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="cc-badge">
+        <div class="cc-icons">
+          <div class="cc-icon">CC</div>
+          <div class="cc-icon">BY</div>
+          <div class="cc-icon">NC</div>
+          <div class="cc-icon">ND</div>
+        </div>
+      </div>
+      <div>
+        <h4>Licencja i prawa autorskie</h4>
+        <p><strong>© 2026 Paweł Majsterek.</strong> Wszelkie prawa zastrzeżone w zakresie nieobjętym licencją.</p>
+        <p>Tekst udostępniany na licencji <strong>Creative Commons Uznanie autorstwa – Użycie niekomercyjne – Bez utworów zależnych 4.0 Międzynarodowe</strong> (CC BY-NC-ND 4.0).</p>
+        <p>Wolno kopiować i rozpowszechniać utwór w dowolnym medium i formacie, pod warunkiem: podania imienia i nazwiska autora (<em>Paweł Majsterek</em>), podania daty (<em>7 marca 2026</em>), zachowania niezmienionej treści, nieużywania do celów komercyjnych.</p>
+        <p><a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.pl" target="_blank">creativecommons.org/licenses/by-nc-nd/4.0</a></p>
+        <p style="color: var(--ink-muted); font-size: 0.75rem; margin-top: 0.75rem;">Entropia i Ofiara: Demon Maxwella, Szata Cheruba i Koszt Porządku · Paweł Majsterek · 7 marca 2026</p>
+      </div>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+  // ── PROGRESS BAR ──
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (scrolled / total * 100) + '%';
+  });
+
+  // ── BACK TO TOP ──
+  const backTop = document.getElementById('backTop');
+  window.addEventListener('scroll', () => {
+    backTop.classList.toggle('visible', window.scrollY > 600);
+  });
+
+  // ── SIDE NAV ──
+  const sideNav = document.getElementById('sideNav');
+  const sections = document.querySelectorAll('section[id]');
+  const dots = document.querySelectorAll('.side-nav-dot');
+
+  window.addEventListener('scroll', () => {
+    sideNav.classList.toggle('visible', window.scrollY > window.innerHeight * 0.5);
+
+    let current = '';
+    sections.forEach(sec => {
+      if (window.scrollY >= sec.offsetTop - 200) current = sec.id;
+    });
+    dots.forEach(dot => {
+      dot.classList.toggle('active', dot.dataset.target === current);
+    });
+  });
+
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      document.getElementById(dot.dataset.target)?.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // ── SCROLL REVEAL ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.06, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+  // ── SMOOTH SCROLL for TOC links ──
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>
